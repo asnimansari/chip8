@@ -1,3 +1,5 @@
+use std::fs::File;
+
 fn main() {
-    println!("Hello, world!");
+    let file = File::open("data/")
 }
