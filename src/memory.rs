@@ -8,7 +8,9 @@ impl Memory {
         self.mem[address as usize] = value
     }
 
-    pub fn read_byte(&mut self, address: u16) {}
+    pub fn read_byte(&mut self, address: u16) -> u8 {
+        self.mem[address as usize]
+    }
 
     pub fn new() -> Memory {
         let mut memory = Memory {

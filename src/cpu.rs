@@ -18,5 +18,19 @@ impl CPU {
         }
     }
 
-    pub fn run_instruction(&mut self, mem: &mut Memory) {}
+    pub fn run_instruction(&mut self, mem: &mut Memory) {
+        let hi = mem.read_byte(self.pc) as u16;
+        let low = mem.read_byte(self.pc + 1) as u16;
+
+
+        let instruction = (hi << 8) | low;
+
+        println!("Instruction Read  {:#X}: lo:{:#X}  high: {:#X}", instruction, hi, low);
+
+        if low == 0 && hi == 0 {
+            panic!();
+        }
+
+        self.pc += 2;
+    }
 }
