@@ -15,7 +15,7 @@ impl CPU {
     pub fn load_rom(&mut self, data: &Vec<u8>) {
         let offset = 0x200;
         for i in 0..data.len() {
-            self.memory.write_byte((offset + i) as u16, data[i])
+            self.memory.write_byte(offset + i, data[i])
         }
     }
 }
