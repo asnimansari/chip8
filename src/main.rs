@@ -1,9 +1,10 @@
 use std::fs::File;
 use std::io::Read;
 
-use crate::cpu::CPU;
+use crate::processor::Chip8;
 
 mod memory;
+mod processor;
 mod cpu;
 
 fn main() {
@@ -14,6 +15,10 @@ fn main() {
 
     println!("Data {:?}", data);
 
-    let mut cpu = CPU::new();
-    cpu.load_rom(&data)
+    let mut cpu = Chip8::new();
+    cpu.load_rom(&data);
+
+    loop {
+        cpu.run_instruction();
+    }
 }

@@ -4,8 +4,8 @@ pub struct Memory {
 }
 
 impl Memory {
-    pub fn write_byte(&mut self, address: usize, value: u8) {
-        self.mem[address] = value
+    pub fn write_byte(&mut self, address: u16, value: u8) {
+        self.mem[address as usize] = value
     }
 
     pub fn read_byte(&mut self, address: u16) {}
@@ -136,13 +136,6 @@ impl Memory {
                 i += 1;
             }
         }
-
-//
-//        for i in 0..0xff{
-//            println!("RAM : {} {:#X}",i, memory.mem[i]);
-//        }
-
-
         memory
     }
 }

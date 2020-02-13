@@ -1,21 +1,22 @@
 use crate::memory::Memory;
 
-pub struct CPU {
-    memory: Memory
-}
+pub const PC_START: u16 = 0x200;
 
+pub struct CPU {
+    vx: [u8; 16],
+    pc: u16,
+    i: u16,
+
+}
 
 impl CPU {
     pub fn new() -> CPU {
         CPU {
-            memory: Memory::new()
+            vx: [0; 16],
+            pc: PC_START,
+            i: 0,
         }
     }
 
-    pub fn load_rom(&mut self, data: &Vec<u8>) {
-        let offset = 0x200;
-        for i in 0..data.len() {
-            self.memory.write_byte(offset + i, data[i])
-        }
-    }
+    pub fn run_instruction(&mut self, mem: &mut Memory) {}
 }
