@@ -1,3 +1,4 @@
+
 pub struct Memory {
     mem: [u8; 4096]
 }
@@ -130,10 +131,16 @@ impl Memory {
 
         let mut i = 0;
         for sprite in sprites.iter() {
-            for ch in sprite {
-                memory.mem[i] = *ch
+            for ch in sprite.iter() {
+                memory.mem[i] = *ch;
+                i += 1;
             }
         }
+
+//
+//        for i in 0..0xff{
+//            println!("RAM : {} {:#X}",i, memory.mem[i]);
+//        }
 
 
         memory
