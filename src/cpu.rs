@@ -43,9 +43,22 @@ impl CPU {
             0x1 => {
                 self.pc = nnn
             }
+            0x3 => {
+                let vx = self.read_to_vx_reg(x);
+                self.pc += 2;
+                if vx == nn {
+                    self.pc += 2;
+                }
+            }
 
             0x6 => {
                 self.write_to_vx_reg(x, nn);
+                self.pc += 2;
+            }
+            0x7 => {
+                let current_vx_value = self.read_to_vx_reg(x);
+
+                self.write_to_vx_reg(x, current_vx_value + nn);
                 self.pc += 2;
             }
             0xA => {
@@ -55,6 +68,15 @@ impl CPU {
             0xD => {
                 self.deug_draw_sprite(mem, x, y, n);
                 self.pc += 2;
+            }
+            0xF => {
+                match nn {
+                    0x1e => {
+                        self.i += self.read_to_vx_reg(x) as u16;
+                        self.pc += 2;
+                    }
+                    _ => unreachable!()
+                }
             }
 
             _ => panic!("Un recognized instruction {:#X} :{:#X}", self.pc, instruction)
