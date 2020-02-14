@@ -12,6 +12,7 @@ impl CPU {
             pc: PC_START,
             i: 0,
             prev_pc: 0,
+            ret_stack: Vec::<u16>::new(),
         }
     }
 
@@ -43,6 +44,11 @@ impl CPU {
             0x1 => {
                 self.pc = nnn
             }
+            0x2 => {
+//                Suboutine call
+                self.ret_stack.push(self.pc + 2);
+                self.pc = nnn;
+            }
             0x3 => {
                 let vx = self.read_to_vx_reg(x);
                 self.pc += 2;
@@ -61,6 +67,16 @@ impl CPU {
                 self.write_to_vx_reg(x, current_vx_value + nn);
                 self.pc += 2;
             }
+            0x8 => {
+                match n {
+                    0x0 => {
+                        let vy = self.read_to_vx_reg(y);
+                        self.write_to_vx_reg(x, vy);
+                        self.pc += 2
+                    }
+                    _ => panic!("Un recognized instruction {:#X} :{:#X}", self.pc, instruction)
+                }
+            }
             0xA => {
                 self.i = nnn;
                 self.pc += 2;
@@ -68,6 +84,12 @@ impl CPU {
             0xD => {
                 self.deug_draw_sprite(mem, x, y, n);
                 self.pc += 2;
+            }
+            0xE => {
+                match nn {
+                    0xA1 => {}
+                    _ => panic!("Un recognized instruction {:#X} :{:#X}", self.pc, instruction)
+                }
             }
             0xF => {
                 match nn {
@@ -114,6 +136,7 @@ pub struct CPU {
     pc: u16,
     i: u16,
     prev_pc: u16,
+    ret_stack: Vec<u16>,
 }
 
 
