@@ -27,10 +27,10 @@ impl CPU {
 
         let nnn = instruction & 0x0FFF;
         let nn = (instruction & 0x00FF) as u8;
-        let n = instruction & 0x000F;
+        let n = (instruction & 0x000F) as u8;
 
-        let x = (instruction & 0x0f00) >> 8;
-        let y = (instruction & 0x00f0) >> 4;
+        let x = ((instruction & 0x0f00) >> 8) as u8;
+        let y = ((instruction & 0x00f0) >> 4) as u8;
 
 
         println!("instruction={:#X} nnn={:#X} nn={:#X} n={:#X} x={:#X} y={:#X} ", instruction, nnn, nn, n, x, y);
@@ -52,16 +52,36 @@ impl CPU {
                 self.i = nnn;
                 self.pc += 2;
             }
-            0xD => {}
+            0xD => {
+                self.deug_draw_sprite(mem, x, y, n);
+                self.pc += 2;
+            }
 
             _ => panic!("Un recognized instruction {:#X} :{:#X}", self.pc, instruction)
         }
     }
 
-    fn write_to_vx_reg(&mut self, index: u16, value: u8) {
+    fn deug_draw_sprite(&self, mem: &mut Memory, x: u8, y: u8, height: u8) {
+        println!("Drawing sprite at ({}, {})", x, y);
+        for y in 0..height {
+            let mut b = mem.read_byte(self.i + y as u16);
+            for _ in 0..8 {
+                match (b & 0b1000_0000) >> 7 {
+                    0 => print!("_"),
+                    1 => print!("#"),
+                    _ => unreachable!()
+                }
+                b = b << 1;
+            }
+            println!();
+        }
+        println!();
+    }
+
+    fn write_to_vx_reg(&mut self, index: u8, value: u8) {
         self.vx[index as usize] = value;
     }
-    fn read_to_vx_reg(&mut self, index: u16) -> u8 {
+    fn read_to_vx_reg(&mut self, index: u8) -> u8 {
         self.vx[index as usize]
     }
 }
