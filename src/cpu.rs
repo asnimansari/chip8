@@ -1,7 +1,7 @@
 use std::fmt;
 use std::fmt::{Error, Formatter};
 
-use crate::memory::Memory;
+use crate::bus::Bus;
 
 pub const PC_START: u16 = 0x200;
 
@@ -16,9 +16,9 @@ impl CPU {
         }
     }
 
-    pub fn run_instruction(&mut self, mem: &mut Memory) {
-        let hi = mem.read_byte(self.pc) as u16;
-        let low = mem.read_byte(self.pc + 1) as u16;
+    pub fn run_instruction(&mut self, bus: &mut Bus) {
+        let hi = bus.memory_read_byte(self.pc) as u16;
+        let low = bus.memory_read_byte(self.pc + 1) as u16;
 
 
         let instruction = (hi << 8) | low;
@@ -82,7 +82,7 @@ impl CPU {
                 self.pc += 2;
             }
             0xD => {
-                self.deug_draw_sprite(mem, x, y, n);
+                self.debug_draw_sprite(bus, x, y, n);
                 self.pc += 2;
             }
             0xE => {
@@ -105,19 +105,11 @@ impl CPU {
         }
     }
 
-    fn deug_draw_sprite(&self, mem: &mut Memory, x: u8, y: u8, height: u8) {
+    fn debug_draw_sprite(&self, bus: &mut Bus, x: u8, y: u8, height: u8) {
         println!("Drawing sprite at ({}, {})", x, y);
         for y in 0..height {
-            let mut b = mem.read_byte(self.i + y as u16);
-            for _ in 0..8 {
-                match (b & 0b1000_0000) >> 7 {
-                    0 => print!("_"),
-                    1 => print!("#"),
-                    _ => unreachable!()
-                }
-                b = b << 1;
-            }
-            println!();
+            let mut b = bus.memory_read_byte(self.i + y as u16);
+            bus.debug_draw_byte(b, x, y);
         }
         println!();
     }

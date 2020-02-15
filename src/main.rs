@@ -6,6 +6,9 @@ use crate::processor::Chip8;
 mod memory;
 mod processor;
 mod cpu;
+mod bus;
+mod display;
+mod keyboard;
 
 fn main() {
     let mut file = File::open("data/INVADERS").unwrap();
