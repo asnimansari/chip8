@@ -16,6 +16,20 @@ impl CPU {
         }
     }
 
+    fn debug_draw_sprite(&mut self, bus: &mut Bus, x: u8, y: u8, height: u8) {
+        println!("Drawing sprite at ({}, {})", x, y);
+
+
+        for y in 0..height {
+            let mut b = bus.memory_read_byte(self.i + y as u16);
+            let should_set_vf = bus.debug_draw_byte(b, x, y);
+
+
+            self.write_to_vx_reg(0xf, if should_set_vf { 1 } else { 0 })
+        }
+        println!();
+    }
+
     pub fn run_instruction(&mut self, bus: &mut Bus) {
         let hi = bus.memory_read_byte(self.pc) as u16;
         let low = bus.memory_read_byte(self.pc + 1) as u16;
@@ -87,7 +101,14 @@ impl CPU {
             }
             0xE => {
                 match nn {
-                    0xA1 => {}
+                    0xA1 => {
+                        let key = self.read_to_vx_reg(x);
+                        if bus.key_pressed(key) {
+                            self.pc += 2
+                        } else {
+                            self.pc += 4
+                        }
+                    }
                     _ => panic!("Un recognized instruction {:#X} :{:#X}", self.pc, instruction)
                 }
             }
@@ -103,15 +124,6 @@ impl CPU {
 
             _ => panic!("Un recognized instruction {:#X} :{:#X}", self.pc, instruction)
         }
-    }
-
-    fn debug_draw_sprite(&self, bus: &mut Bus, x: u8, y: u8, height: u8) {
-        println!("Drawing sprite at ({}, {})", x, y);
-        for y in 0..height {
-            let mut b = bus.memory_read_byte(self.i + y as u16);
-            bus.debug_draw_byte(b, x, y);
-        }
-        println!();
     }
 
     fn write_to_vx_reg(&mut self, index: u8, value: u8) {
