@@ -1,30 +1,34 @@
 use crate::bus::Bus;
-use crate::cpu::CPU;
-use crate::cpu::PC_START;
-use crate::memory::Memory;
+use crate::cpu::Cpu;
+use crate::cpu::PROGRAM_START;
 
-pub struct Chip8 {
-    cpu: CPU,
+pub struct Processor {
     bus: Bus,
+    cpu: Cpu,
 }
 
-
-impl Chip8 {
-    pub fn new() -> Chip8 {
-        Chip8 {
-            cpu: CPU::new(),
+impl Processor {
+    pub fn new() -> Processor {
+        Processor {
             bus: Bus::new(),
+            cpu: Cpu::new(),
         }
     }
 
     pub fn load_rom(&mut self, data: &Vec<u8>) {
         for i in 0..data.len() {
-            self.bus.memory_write_byte(PC_START + (i as u16), data[i])
+            self.bus.ram_write_byte(PROGRAM_START + (i as u16), data[i]);
         }
     }
-    pub fn run_instruction(&mut self) {
-        self.cpu.run_instruction(&mut self.bus);
 
-        println!("CPU State {:?}", self.cpu);
+    pub fn run_instruction(&mut self) {
+        self.bus.tick();
+        self.cpu.run_instruction(&mut self.bus);
+        println!("Cpu state: {:?}", self.cpu);
+        println!("Bus state: {:?}", self.bus);
+    }
+
+    pub fn get_display_buffer(&self) -> &[u8] {
+        self.bus.get_display_buffer()
     }
 }
