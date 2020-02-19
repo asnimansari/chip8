@@ -2,10 +2,13 @@ extern crate minifb;
 
 use std::fs::File;
 use std::io::Read;
+use std::thread;
+use std::time::Duration;
 
 use minifb::{Key, Window, WindowOptions};
 
 use crate::cpu::Cpu;
+use crate::display::Display;
 use crate::processor::Processor;
 
 mod memory;
@@ -20,17 +23,12 @@ fn main() {
     let mut data = Vec::<u8>::new();
     file.read_to_end(&mut data);
 
-    let mut chip8 = Processor::new();
-
-
-    chip8.load_rom(&data);
 
     let WIDTH = 640;
     let HEIGHT = 320;
     let mut buffer: Vec<u32> = vec![0; WIDTH * HEIGHT];
-    for i in buffer.iter_mut() {
-        *i = 0xffff0000;
-    }
+
+
     let mut window = Window::new("Rust Chip8 emulator",
                                  WIDTH,
                                  HEIGHT,
@@ -38,9 +36,27 @@ fn main() {
         panic!("{}", e);
     });
 
+    let mut chip8 = Processor::new(window);
+    chip8.load_rom(&data);
+
     while window.is_open() && !window.is_key_down(Key::Escape) {
         chip8.run_instruction();
         let chip8_buffer = chip8.get_display_buffer();
+
+
+        for y in 0..HEIGHT {
+            for x in 0..WIDTH {
+                let index = Display::get_index_from_coords(x / 10, y / 10);
+                let pixel = chip8_buffer[index];
+                let color_pixel = match pixel {
+                    0 => 0x0,
+                    1 => 0xffffff,
+                    _ => unreachable!()
+                };
+                buffer[y * WIDTH + x] = color_pixel;
+            }
+        }
+
 
         window.update_with_buffer(&buffer).unwrap();
     }

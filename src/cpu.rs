@@ -186,24 +186,33 @@ impl Cpu {
                     0x07 => {
                         self.write_reg_vx(x, bus.get_delay_timer());
                         self.pc += 2;
-                    },
+                    }
+                    0x0A => {
+                        let key = bus.get_key_pressed();
+                        match key {
+                            Some(val) => {
+                                self.write_reg_vx(x, val);
+                            }
+                            None => ()
+                        }
+                    }
                     0x15 => {
                         bus.set_delay_timer(self.read_reg_vx(x));
                         self.pc += 2;
-                    },
+                    }
                     0x65 => {
                         for index in 0..x + 1 {
                             let value = bus.ram_read_byte(self.i + index as u16);
                             self.write_reg_vx(index, value);
                         }
                         self.pc += 2;
-                    },
+                    }
                     0x1E => {
                         //I +=Vx
                         let vx = self.read_reg_vx(x);
                         self.i += vx as u16;
                         self.pc += 2;
-                    },
+                    }
                     _ => panic!("Unrecognized 0xF instruction {:#X}:{:#X}", self.pc, instruction)
                 }
             }

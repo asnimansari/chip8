@@ -1,5 +1,7 @@
 use std::fmt;
 
+use minifb::{Key, Window, WindowOptions};
+
 use crate::display::Display;
 use crate::keyboard::Keyboard;
 use crate::memory::Memory;
@@ -13,10 +15,10 @@ pub struct Bus {
 
 
 impl Bus {
-    pub fn new() -> Bus {
+    pub fn new(window: &mut Window) -> Bus {
         Bus {
             ram: Memory::new(),
-            keyboard: Keyboard::new(),
+            keyboard: Keyboard::new(window),
             display: Display::new(),
             delay_timer: 0,
         }
@@ -62,6 +64,9 @@ impl Bus {
 
     pub fn get_display_buffer(&self) -> &[u8] {
         self.display.get_display_buffer()
+    }
+    pub fn get_key_pressed(&self) -> Option<u8> {
+        self.keyboard.get_key_blocking()
     }
 }
 

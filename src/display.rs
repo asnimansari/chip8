@@ -12,7 +12,7 @@ impl Display {
         }
     }
 
-    fn get_index_from_coords(x: usize, y: usize) -> usize {
+    pub fn get_index_from_coords(x: usize, y: usize) -> usize {
         y * WIDTH + x
     }
 

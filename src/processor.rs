@@ -1,3 +1,5 @@
+use minifb::{Key, Window, WindowOptions};
+
 use crate::bus::Bus;
 use crate::cpu::Cpu;
 use crate::cpu::PROGRAM_START;
@@ -5,14 +7,12 @@ use crate::cpu::PROGRAM_START;
 pub struct Processor {
     bus: Bus,
     cpu: Cpu,
+
 }
 
 impl Processor {
-    pub fn new() -> Processor {
-        Processor {
-            bus: Bus::new(),
-            cpu: Cpu::new(),
-        }
+    pub fn new(window: &mut Window) -> Processor {
+        Processor { bus: Bus::new(window), cpu: Cpu::new() }
     }
 
     pub fn load_rom(&mut self, data: &Vec<u8>) {
