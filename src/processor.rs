@@ -11,8 +11,8 @@ pub struct Processor {
 }
 
 impl Processor {
-    pub fn new(window: &mut Window) -> Processor {
-        Processor { bus: Bus::new(window), cpu: Cpu::new() }
+    pub fn new() -> Processor {
+        Processor { bus: Bus::new(), cpu: Cpu::new() }
     }
 
     pub fn load_rom(&mut self, data: &Vec<u8>) {
@@ -30,5 +30,9 @@ impl Processor {
 
     pub fn get_display_buffer(&self) -> &[u8] {
         self.bus.get_display_buffer()
+    }
+
+    pub fn set_key_pressed(&mut self, key: Option<u8>) {
+        self.bus.set_key_pressed(key);
     }
 }

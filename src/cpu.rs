@@ -8,7 +8,7 @@ pub struct Cpu {
     vx: [u8; 16],
     pc: u16,
     i: u16,
-    prev_pc: u16,
+
     ret_stack: Vec<u16>,
 }
 
@@ -19,7 +19,7 @@ impl Cpu {
             vx: [0; 16],
             pc: PROGRAM_START,
             i: 0,
-            prev_pc: 0,
+
             ret_stack: Vec::<u16>::new(),
         }
     }
@@ -43,10 +43,6 @@ impl Cpu {
         let y = ((instruction & 0x00F0) >> 4) as u8;
         println!("nnn={:?}, nn={:?}, n={:?} x={}, y={}", nnn, nn, n, x, y);
 
-        if self.prev_pc == self.pc {
-            panic!("Please increment PC!");
-        }
-        self.prev_pc = self.pc;
 
         match (instruction & 0xF000) >> 12 {
             0x0 => {
@@ -80,6 +76,14 @@ impl Cpu {
                 //if(Vx==NN)
                 let vx = self.read_reg_vx(x);
                 if vx == nn {
+                    self.pc += 4;
+                } else {
+                    self.pc += 2;
+                }
+            }
+            0x4 => {
+                let vx = self.read_reg_vx(x);
+                if vx != nn {
                     self.pc += 4;
                 } else {
                     self.pc += 2;
@@ -154,7 +158,7 @@ impl Cpu {
                     0xA1 => {
                         // if(key()!=Vx) then skip the next instruction
                         let key = self.read_reg_vx(x);
-                        if !bus.key_pressed(key) {
+                        if !bus.is_key_pressed(key) {
                             self.pc += 4;
                         } else {
                             self.pc += 2;
@@ -163,12 +167,13 @@ impl Cpu {
                     0x9E => {
                         // if(key()==Vx) then skip the next instruction
                         let key = self.read_reg_vx(x);
-                        if bus.key_pressed(key) {
+                        if bus.is_key_pressed(key) {
                             self.pc += 4;
                         } else {
                             self.pc += 2;
                         }
                     }
+
                     _ => panic!(
                         "Unrecognized 0xEX** instruction {:#X}:{:#X}",
                         self.pc,
@@ -192,6 +197,7 @@ impl Cpu {
                         match key {
                             Some(val) => {
                                 self.write_reg_vx(x, val);
+                                self.pc += 2;
                             }
                             None => ()
                         }
@@ -205,6 +211,9 @@ impl Cpu {
                             let value = bus.ram_read_byte(self.i + index as u16);
                             self.write_reg_vx(index, value);
                         }
+                        self.pc += 2;
+                    }
+                    0x18 => {
                         self.pc += 2;
                     }
                     0x1E => {
@@ -224,14 +233,14 @@ impl Cpu {
     fn debug_draw_sprite(&mut self, bus: &mut Bus, x: u8, y: u8, height: u8) {
         println!("Drawing sprite at ({}, {})", x, y);
         let mut should_set_vf = false;
-        for y in 0..height {
-            let b = bus.ram_read_byte(self.i + y as u16);
-            if bus.debug_draw_byte(b, x, y) {
+        for sprite_y in 0..height {
+            let b = bus.ram_read_byte(self.i + sprite_y as u16);
+            if bus.debug_draw_byte(b, x, sprite_y) {
                 should_set_vf = true;
             }
         }
         if should_set_vf {
-            self.write_reg_vx(0xF, 0);
+            self.write_reg_vx(0xF, 1);
         } else {
             self.write_reg_vx(0xF, 0);
         }

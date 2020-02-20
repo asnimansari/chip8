@@ -15,10 +15,10 @@ pub struct Bus {
 
 
 impl Bus {
-    pub fn new(window: &mut Window) -> Bus {
+    pub fn new() -> Bus {
         Bus {
             ram: Memory::new(),
-            keyboard: Keyboard::new(window),
+            keyboard: Keyboard::new(),
             display: Display::new(),
             delay_timer: 0,
         }
@@ -44,9 +44,7 @@ impl Bus {
         self.display.clear();
     }
 
-    pub fn key_pressed(&self, key_code: u8) -> bool {
-        self.keyboard.key_pressed(key_code)
-    }
+
 
     pub fn tick(&mut self) {
         if self.delay_timer > 0 {
@@ -66,7 +64,16 @@ impl Bus {
         self.display.get_display_buffer()
     }
     pub fn get_key_pressed(&self) -> Option<u8> {
-        self.keyboard.get_key_blocking()
+        self.keyboard.get_key_pressed()
+    }
+
+
+    pub fn set_key_pressed(&mut self, key: Option<u8>) {
+        self.keyboard.set_key_pressed(key);
+    }
+
+    pub fn is_key_pressed(&self, key_code: u8) -> bool {
+        self.keyboard.is_key_pressed(key_code)
     }
 }
 
