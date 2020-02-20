@@ -50,6 +50,8 @@ impl Bus {
         if self.delay_timer > 0 {
             self.delay_timer -= 1;
         }
+
+        self.delay_timer = 0;
     }
 
     pub fn set_delay_timer(&mut self, value: u8) {

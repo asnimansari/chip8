@@ -89,6 +89,15 @@ impl Cpu {
                     self.pc += 2;
                 }
             }
+            0x5 => {
+                let vx = self.read_reg_vx(x);
+                let vy = self.read_reg_vx(y);
+                if vx == vy {
+                    self.pc += 4
+                } else {
+                    self.pc += 2
+                }
+            }
             0x6 => {
                 //vx = nn
                 self.write_reg_vx(x, nn);
@@ -104,19 +113,19 @@ impl Cpu {
                 let vx = self.read_reg_vx(x);
 
                 match n {
-                    0 => {
+                    0x0 => {
                         // Vx=Vy
                         self.write_reg_vx(x, vy);
                     }
-                    2 => {
+                    0x2 => {
                         // Vx=Vx&Vy
                         self.write_reg_vx(x, vx & vy);
                     }
-                    3 => {
+                    0x3 => {
                         // Vx=Vx^Vy
                         self.write_reg_vx(x, vx ^ vy);
                     }
-                    4 => {
+                    0x4 => {
                         //	Vx += Vy
                         let sum: u16 = vx as u16 + vy as u16;
                         self.write_reg_vx(x, sum as u8);
@@ -124,14 +133,14 @@ impl Cpu {
                             self.write_reg_vx(0xF, 1);
                         }
                     }
-                    5 => {
+                    0x5 => {
                         let diff: i8 = vx as i8 - vy as i8;
                         self.write_reg_vx(x, diff as u8);
                         if diff < 0 {
                             self.write_reg_vx(0xF, 1);
                         }
                     }
-                    6 => {
+                    0x6 => {
                         // Vx=Vy=Vy>>1
                         self.write_reg_vx(0xF, vy & 0x1);
                         self.write_reg_vx(y, vy >> 1);

@@ -2,7 +2,6 @@ extern crate minifb;
 
 use std::fs::File;
 use std::io::Read;
-use std::thread;
 use std::time::Duration;
 
 use minifb::{Key, KeyRepeat, Window, WindowOptions};
@@ -45,7 +44,7 @@ fn get_keycode_for(key: Option<Key>) -> Option<u8> {
 }
 
 fn main() {
-    let mut file = File::open("data/INVADERS").unwrap();
+    let mut file = File::open("data/MERLIN").unwrap();
     let mut data = Vec::<u8>::new();
     file.read_to_end(&mut data);
 
