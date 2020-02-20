@@ -235,7 +235,7 @@ impl Cpu {
         let mut should_set_vf = false;
         for sprite_y in 0..height {
             let b = bus.ram_read_byte(self.i + sprite_y as u16);
-            if bus.debug_draw_byte(b, x, sprite_y) {
+            if bus.debug_draw_byte(b, x, y + sprite_y) {
                 should_set_vf = true;
             }
         }
