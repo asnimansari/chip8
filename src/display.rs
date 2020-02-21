@@ -19,10 +19,12 @@ impl Display {
     pub fn debug_draw_byte(&mut self, byte: u8, x: u8, y: u8) -> bool {
         let mut erased = false;
         let mut coord_x = x as usize;
-        let coord_y = y as usize;
+        let mut coord_y = y as usize;
         let mut b = byte;
 
         for _ in 0..8 {
+            coord_x %= WIDTH;
+            coord_y %= HEIGHT;
             let index = Display::get_index_from_coords(coord_x, coord_y);
             let bit = (b & 0b1000_0000) >> 7;
 

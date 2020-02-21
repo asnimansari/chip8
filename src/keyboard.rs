@@ -1,5 +1,3 @@
-use minifb::{Key, KeyRepeat, Window, WindowOptions};
-
 use crate::main;
 
 pub struct Keyboard {
@@ -27,10 +25,10 @@ impl Keyboard {
     }
 
     pub fn is_key_pressed(&self, key_code: u8) -> bool {
-        return true;
-        match self.key_pressed {
-            Some(key) => key == key_code,
-            _ => false
+        if let Some(key) = self.key_pressed {
+            key == key_code
+        } else {
+            false
         }
     }
 }
