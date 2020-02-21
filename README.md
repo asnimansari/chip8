@@ -15,3 +15,15 @@ Games are included in `data` folder.
 
 
 ### Build
+For production build 
+```
+cargo build --release
+```
+
+and give the same path as argument like.. 
+
+```
+./chip-8-rust programs/INVADERS 
+```
+
+For developers please use  `cargo run` inside the project directory to start
