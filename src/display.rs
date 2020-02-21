@@ -28,7 +28,6 @@ impl Display {
             let index = Display::get_index_from_coords(coord_x, coord_y);
             let bit = (b & 0b1000_0000) >> 7;
 
-
             let prev_value = self.screen[index];
             self.screen[index] ^= bit;
 
@@ -59,7 +58,7 @@ impl Display {
             match pixel {
                 0 => print!("_"),
                 1 => print!("*"),
-                _ => unreachable!()
+                _ => unreachable!(),
             };
         }
         print!("\n");

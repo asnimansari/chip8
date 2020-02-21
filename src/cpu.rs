@@ -6,7 +6,6 @@ use rand::distributions::{IndependentSample, Range};
 
 use crate::bus::Bus;
 
-
 pub const PROGRAM_START: u16 = 0x200;
 
 pub struct Cpu {
@@ -15,9 +14,7 @@ pub struct Cpu {
     i: u16,
     ret_stack: Vec<u16>,
     rng: rand::ThreadRng,
-
 }
-
 
 impl Cpu {
     pub fn new() -> Cpu {
@@ -35,21 +32,13 @@ impl Cpu {
         let hi = bus.ram_read_byte(self.pc) as u16;
         let lo = bus.ram_read_byte(self.pc + 1) as u16;
         let instruction: u16 = (hi << 8) | lo;
-        println!(
-            "Instruction read {:#X}:{:#X}: hi{:#X} lo:{:#X} ",
-            self.pc,
-            instruction,
-            hi,
-            lo
-        );
 
         let nnn = instruction & 0x0FFF;
         let nn = (instruction & 0x0FF) as u8;
         let n = (instruction & 0x00F) as u8;
         let x = ((instruction & 0x0F00) >> 8) as u8;
         let y = ((instruction & 0x00F0) >> 4) as u8;
-        println!("nnn={:?}, nn={:?}, n={:?} x={}, y={}", nnn, nn, n, x, y);
-
+        // println!("nnn={:?}, nn={:?}, n={:?} x={}, y={}", nnn, nn, n, x, y);
 
         match (instruction & 0xF000) >> 12 {
             0x0 => {
@@ -65,8 +54,7 @@ impl Cpu {
                     }
                     _ => panic!(
                         "Unrecognized 0x00** instruction {:#X}:{:#X}",
-                        self.pc,
-                        instruction
+                        self.pc, instruction
                     ),
                 }
             }
@@ -166,8 +154,7 @@ impl Cpu {
                     }
                     _ => panic!(
                         "Unrecognized 0x8XY* instruction {:#X}:{:#X}",
-                        self.pc,
-                        instruction
+                        self.pc, instruction
                     ),
                 };
 
@@ -203,6 +190,7 @@ impl Cpu {
                 //draw(Vx,Vy,N)
                 let vx = self.read_reg_vx(x);
                 let vy = self.read_reg_vx(y);
+
                 self.debug_draw_sprite(bus, vx, vy, n);
                 self.pc += 2;
             }
@@ -229,8 +217,7 @@ impl Cpu {
 
                     _ => panic!(
                         "Unrecognized 0xEX** instruction {:#X}:{:#X}",
-                        self.pc,
-                        instruction
+                        self.pc, instruction
                     ),
                 };
             }
@@ -248,7 +235,7 @@ impl Cpu {
                                 self.write_reg_vx(x, val);
                                 self.pc += 2;
                             }
-                            None => ()
+                            None => (),
                         }
                     }
                     0x15 => {
@@ -264,24 +251,24 @@ impl Cpu {
                     }
                     0x18 => {
                         self.pc += 2;
-                    },
+                    }
                     0x1E => {
                         //I +=Vx
                         let vx = self.read_reg_vx(x);
                         self.i += vx as u16;
                         self.pc += 2;
-                    },
+                    }
                     0x29 => {
                         self.i = self.read_reg_vx(x) as u16 * 5;
                         self.pc += 2;
-                    },
+                    }
                     0x33 => {
                         let vx = self.read_reg_vx(x);
                         bus.ram_write_byte(self.i, vx / 100);
                         bus.ram_write_byte(self.i + 1, (vx % 100) / 10);
                         bus.ram_write_byte(self.i + 2, vx % 10);
                         self.pc += 2;
-                    },
+                    }
                     0x55 => {
                         for index in 0..x + 1 {
                             let value = self.read_reg_vx(index);
@@ -289,7 +276,7 @@ impl Cpu {
                         }
                         self.i += x as u16 + 1;
                         self.pc += 2;
-                    },
+                    }
                     0x65 => {
                         for index in 0..x + 1 {
                             let value = bus.ram_read_byte(self.i + index as u16);
@@ -298,7 +285,10 @@ impl Cpu {
                         self.i += x as u16 + 1;
                         self.pc += 2;
                     }
-                    _ => panic!("Unrecognized 0xF instruction {:#X}:{:#X}", self.pc, instruction)
+                    _ => panic!(
+                        "Unrecognized 0xF instruction {:#X}:{:#X}",
+                        self.pc, instruction
+                    ),
                 }
             }
 
@@ -307,7 +297,7 @@ impl Cpu {
     }
 
     fn debug_draw_sprite(&mut self, bus: &mut Bus, x: u8, y: u8, height: u8) {
-        println!("Drawing sprite at ({}, {})", x, y);
+        // println!("Drawing sprite at ({}, {})", x, y);
         let mut should_set_vf = false;
         for sprite_y in 0..height {
             let b = bus.ram_read_byte(self.i + sprite_y as u16);
@@ -321,7 +311,7 @@ impl Cpu {
             self.write_reg_vx(0xF, 0);
         }
 
-        bus.present_screen();
+        // bus.present_screen();
     }
 
     pub fn write_reg_vx(&mut self, index: u8, value: u8) {

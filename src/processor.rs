@@ -7,12 +7,14 @@ use crate::cpu::PROGRAM_START;
 pub struct Processor {
     bus: Bus,
     cpu: Cpu,
-
 }
 
 impl Processor {
     pub fn new() -> Processor {
-        Processor { bus: Bus::new(), cpu: Cpu::new() }
+        Processor {
+            bus: Bus::new(),
+            cpu: Cpu::new(),
+        }
     }
 
     pub fn load_rom(&mut self, data: &Vec<u8>) {
@@ -24,8 +26,8 @@ impl Processor {
     pub fn run_instruction(&mut self) {
         self.bus.tick();
         self.cpu.run_instruction(&mut self.bus);
-        println!("Cpu state: {:?}", self.cpu);
-        println!("Bus state: {:?}", self.bus);
+        // println!("Cpu state: {:?}", self.cpu);
+        // println!("Bus state: {:?}", self.bus);
     }
 
     pub fn get_display_buffer(&self) -> &[u8] {

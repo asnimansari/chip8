@@ -11,13 +11,12 @@ use crate::cpu::Cpu;
 use crate::display::Display;
 use crate::processor::Processor;
 
-mod memory;
+mod bus;
 mod cpu;
-mod processor;
 mod display;
 mod keyboard;
-mod bus;
-
+mod memory;
+mod processor;
 
 fn get_keycode_for(key: Option<Key>) -> Option<u8> {
     match key {
@@ -40,7 +39,7 @@ fn get_keycode_for(key: Option<Key>) -> Option<u8> {
         Some(Key::X) => Some(0x0),
         Some(Key::C) => Some(0xB),
         Some(Key::V) => Some(0xF),
-        _ => None
+        _ => None,
     }
 }
 
@@ -55,22 +54,22 @@ fn main() {
     let mut data = Vec::<u8>::new();
     file.read_to_end(&mut data).expect("File Not Found");
 
-
     let width = 640;
     let height = 320;
     let mut buffer: Vec<u32> = vec![0; width * height];
 
-
-    let mut window = Window::new("Rust Chip8 emulator",
-                                 width,
-                                 height,
-                                 WindowOptions::default()).unwrap_or_else(|e| {
+    let mut window = Window::new(
+        "Rust Chip8 emulator",
+        width,
+        height,
+        WindowOptions::default(),
+    )
+    .unwrap_or_else(|e| {
         panic!("{}", e);
     });
 
     let mut chip8 = Processor::new();
     chip8.load_rom(&data);
-
 
     let mut last_key_update_time = Instant::now();
     let mut last_instruction_run_time = Instant::now();
@@ -86,26 +85,23 @@ fn main() {
                     None
                 }
             }
-            None => None
+            None => None,
         };
-
 
         let diff_update_time = Instant::now() - last_key_update_time;
 
-
         let chip_8key = get_keycode_for(key);
 
-        if chip_8key.is_some() || diff_update_time >= Duration::from_millis(250) {
+        if chip_8key.is_some() || diff_update_time >= Duration::from_millis(400) {
             last_key_update_time = Instant::now();
             chip8.set_key_pressed(chip_8key);
         }
 
         let diff_update_time = Instant::now() - last_instruction_run_time;
-        if diff_update_time > Duration::from_millis(16) {
+        if diff_update_time > Duration::from_millis(1) {
             chip8.run_instruction();
             last_instruction_run_time = Instant::now();
         }
-
 
         let chip8_buffer = chip8.get_display_buffer();
 
@@ -121,7 +117,6 @@ fn main() {
                 buffer[y * width + x] = color_pixel;
             }
         }
-
 
         window.update_with_buffer(&buffer).unwrap();
     }

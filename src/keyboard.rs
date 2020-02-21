@@ -1,15 +1,12 @@
 use crate::main;
 
 pub struct Keyboard {
-    key_pressed: Option<u8>
+    key_pressed: Option<u8>,
 }
-
 
 impl Keyboard {
     pub fn new() -> Keyboard {
-        Keyboard {
-            key_pressed: None,
-        }
+        Keyboard { key_pressed: None }
     }
 
     //Todo implement proper key handling
