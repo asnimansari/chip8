@@ -263,7 +263,7 @@ impl CPU {
                         self.pc += 2;
                     }
                     0x55 => {
-                        for index in 0..x + 1 {
+                        for index in 0..=x {
                             let value = self.read_reg_vx(index);
                             bus.ram_write_byte(self.i + index as u16, value);
                         }
