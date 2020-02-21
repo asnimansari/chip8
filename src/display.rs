@@ -27,17 +27,17 @@ impl Display {
             coord_y %= HEIGHT;
             let index = Display::get_index_from_coords(coord_x, coord_y);
             let bit = (b & 0b1000_0000) >> 7;
-
             let prev_value = self.screen[index];
             self.screen[index] ^= bit;
 
             if prev_value == 1 && self.screen[index] == 0 {
-                erased = true
+                erased = true;
             }
 
             coord_x += 1;
-            b = b << 1;
+            b <<= 1;
         }
+
         erased
     }
 
@@ -45,23 +45,6 @@ impl Display {
         for pixel in self.screen.iter_mut() {
             *pixel = 0;
         }
-    }
-
-    pub fn present(&self) {
-        for index in 0..self.screen.len() {
-            let pixel = self.screen[index];
-
-            if index % WIDTH == 0 {
-                print!("\n");
-            }
-
-            match pixel {
-                0 => print!("_"),
-                1 => print!("*"),
-                _ => unreachable!(),
-            };
-        }
-        print!("\n");
     }
 
     pub fn get_display_buffer(&self) -> &[u8] {

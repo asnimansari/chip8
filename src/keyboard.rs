@@ -1,5 +1,3 @@
-use crate::main;
-
 pub struct Keyboard {
     key_pressed: Option<u8>,
 }
@@ -9,18 +7,6 @@ impl Keyboard {
         Keyboard { key_pressed: None }
     }
 
-    //Todo implement proper key handling
-    pub fn key_pressed(&self, key_code: u8) -> bool {
-        true
-    }
-
-    pub fn set_key_pressed(&mut self, key: Option<u8>) {
-        self.key_pressed = key;
-    }
-    pub fn get_key_pressed(&self) -> Option<u8> {
-        self.key_pressed
-    }
-
     pub fn is_key_pressed(&self, key_code: u8) -> bool {
         if let Some(key) = self.key_pressed {
             key == key_code
@@ -28,6 +14,12 @@ impl Keyboard {
             false
         }
     }
-}
 
-//https://youtu.be/zm44LNb2n0s?t=6584
+    pub fn set_key_pressed(&mut self, key: Option<u8>) {
+        self.key_pressed = key;
+    }
+
+    pub fn get_key_pressed(&self) -> Option<u8> {
+        self.key_pressed
+    }
+}

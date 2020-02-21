@@ -1,8 +1,5 @@
 use std::fmt;
 use std::time;
-use std::time::Instant;
-
-use minifb::{Key, Window, WindowOptions};
 
 use crate::display::Display;
 use crate::keyboard::Keyboard;
@@ -13,7 +10,7 @@ pub struct Bus {
     keyboard: Keyboard,
     display: Display,
     delay_timer: u8,
-    delay_timer_set_time: Instant,
+    delay_timer_set_time: time::Instant,
 }
 
 impl Bus {
@@ -39,24 +36,27 @@ impl Bus {
         self.display.debug_draw_byte(byte, x, y)
     }
 
-    pub fn present_screen(&self) {
-        self.display.present();
-    }
-
     pub fn clear_screen(&mut self) {
         self.display.clear();
     }
 
-    pub fn tick(&mut self) {
-        if self.delay_timer > 0 {
-            self.delay_timer -= 1;
-        }
+    pub fn set_key_pressed(&mut self, key: Option<u8>) {
+        self.keyboard.set_key_pressed(key);
+    }
+
+    pub fn is_key_pressed(&self, key_code: u8) -> bool {
+        self.keyboard.is_key_pressed(key_code)
+    }
+
+    pub fn get_key_pressed(&self) -> Option<u8> {
+        self.keyboard.get_key_pressed()
     }
 
     pub fn set_delay_timer(&mut self, value: u8) {
         self.delay_timer_set_time = time::Instant::now();
         self.delay_timer = value;
     }
+
     pub fn get_delay_timer(&self) -> u8 {
         let diff = time::Instant::now() - self.delay_timer_set_time;
         let ms = diff.get_millis();
@@ -71,17 +71,6 @@ impl Bus {
     pub fn get_display_buffer(&self) -> &[u8] {
         self.display.get_display_buffer()
     }
-    pub fn get_key_pressed(&self) -> Option<u8> {
-        self.keyboard.get_key_pressed()
-    }
-
-    pub fn set_key_pressed(&mut self, key: Option<u8>) {
-        self.keyboard.set_key_pressed(key);
-    }
-
-    pub fn is_key_pressed(&self, key_code: u8) -> bool {
-        self.keyboard.is_key_pressed(key_code)
-    }
 }
 
 impl fmt::Debug for Bus {
@@ -90,13 +79,13 @@ impl fmt::Debug for Bus {
     }
 }
 
-trait MilliSecond {
+trait Milliseconds {
     fn get_millis(&self) -> u64;
 }
 
-impl MilliSecond for time::Duration {
+impl Milliseconds for time::Duration {
     fn get_millis(&self) -> u64 {
-        let nanos = self.subsec_micros() as u64;
+        let nanos = self.subsec_nanos() as u64;
         (1000 * 1000 * 1000 * self.as_secs() + nanos) / (1000 * 1000)
     }
 }

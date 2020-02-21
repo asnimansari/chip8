@@ -1,8 +1,6 @@
-
 pub struct Memory {
     mem: [u8; 4096],
 }
-
 
 impl Memory {
     pub fn new() -> Memory {
@@ -29,7 +27,7 @@ impl Memory {
         ];
 
         let mut i = 0;
-        for sprite in sprites.iter() {
+        for sprite in &sprites {
             for ch in sprite {
                 ram.mem[i] = *ch;
                 i += 1;

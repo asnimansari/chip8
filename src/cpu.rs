@@ -1,14 +1,13 @@
-extern crate rand;
-
 use std::fmt;
 
+use rand;
 use rand::distributions::{IndependentSample, Range};
 
 use crate::bus::Bus;
 
 pub const PROGRAM_START: u16 = 0x200;
 
-pub struct Cpu {
+pub struct CPU {
     vx: [u8; 16],
     pc: u16,
     i: u16,
@@ -16,15 +15,14 @@ pub struct Cpu {
     rng: rand::ThreadRng,
 }
 
-impl Cpu {
-    pub fn new() -> Cpu {
-        Cpu {
+impl CPU {
+    pub fn new() -> CPU {
+        CPU {
             vx: [0; 16],
             pc: PROGRAM_START,
             i: 0,
-            rng: rand::thread_rng(),
-
             ret_stack: Vec::<u16>::new(),
+            rng: rand::thread_rng(),
         }
     }
 
@@ -38,7 +36,7 @@ impl Cpu {
         let n = (instruction & 0x00F) as u8;
         let x = ((instruction & 0x0F00) >> 8) as u8;
         let y = ((instruction & 0x00F0) >> 4) as u8;
-        // println!("nnn={:?}, nn={:?}, n={:?} x={}, y={}", nnn, nn, n, x, y);
+        //println!("nnn={:?}, nn={:?}, n={:?} x={}, y={}", nnn, nn, n, x, y);
 
         match (instruction & 0xF000) >> 12 {
             0x0 => {
@@ -77,6 +75,7 @@ impl Cpu {
                 }
             }
             0x4 => {
+                //Skip next instruction if(Vx!=NN)
                 let vx = self.read_reg_vx(x);
                 if vx != nn {
                     self.pc += 4;
@@ -85,12 +84,13 @@ impl Cpu {
                 }
             }
             0x5 => {
+                //Skip next instruction if(Vx==Vy)
                 let vx = self.read_reg_vx(x);
                 let vy = self.read_reg_vx(y);
                 if vx == vy {
-                    self.pc += 4
+                    self.pc += 4;
                 } else {
-                    self.pc += 2
+                    self.pc += 2;
                 }
             }
             0x6 => {
@@ -133,14 +133,17 @@ impl Cpu {
                         self.write_reg_vx(x, diff as u8);
                         if diff < 0 {
                             self.write_reg_vx(0xF, 1);
+                        } else {
+                            self.write_reg_vx(0xF, 0);
                         }
                     }
                     0x6 => {
-                        self.write_reg_vx(0xF, vy & 0x1);
+                        // Vx=Vx>>1
+                        self.write_reg_vx(0xF, vx & 0x1);
                         self.write_reg_vx(x, vx >> 1);
                     }
                     0x7 => {
-                        let diff: i8 = vx as i8 - vy as i8;
+                        let diff: i8 = vy as i8 - vx as i8;
                         self.write_reg_vx(x, diff as u8);
                         if diff < 0 {
                             self.write_reg_vx(0xF, 1);
@@ -149,6 +152,8 @@ impl Cpu {
                         }
                     }
                     0xE => {
+                        // VF is the most significant bit value.
+                        // SHR Vx
                         self.write_reg_vx(0xF, (vx & 0x80) >> 7);
                         self.write_reg_vx(x, vx << 1);
                     }
@@ -160,8 +165,8 @@ impl Cpu {
 
                 self.pc += 2;
             }
-
             0x9 => {
+                //skips the next instruction if(Vx!=Vy)
                 let vx = self.read_reg_vx(x);
                 let vy = self.read_reg_vx(y);
                 if vx != vy {
@@ -171,7 +176,6 @@ impl Cpu {
                 }
             }
             0xA => {
-                //I = NNN
                 self.i = nnn;
                 self.pc += 2;
             }
@@ -179,18 +183,16 @@ impl Cpu {
                 self.pc = self.read_reg_vx(0) as u16 + nnn;
             }
             0xC => {
-                let mut rng = rand::thread_rng();
+                // Vx=rand() & NN
                 let interval = Range::new(0, 255);
-                let number = interval.ind_sample(&mut rng);
+                let number = interval.ind_sample(&mut self.rng);
                 self.write_reg_vx(x, number & nn);
                 self.pc += 2;
             }
-
             0xD => {
                 //draw(Vx,Vy,N)
                 let vx = self.read_reg_vx(x);
                 let vy = self.read_reg_vx(y);
-
                 self.debug_draw_sprite(bus, vx, vy, n);
                 self.pc += 2;
             }
@@ -214,14 +216,12 @@ impl Cpu {
                             self.pc += 2;
                         }
                     }
-
                     _ => panic!(
                         "Unrecognized 0xEX** instruction {:#X}:{:#X}",
                         self.pc, instruction
                     ),
                 };
             }
-
             0xF => {
                 match nn {
                     0x07 => {
@@ -229,27 +229,17 @@ impl Cpu {
                         self.pc += 2;
                     }
                     0x0A => {
-                        let key = bus.get_key_pressed();
-                        match key {
-                            Some(val) => {
-                                self.write_reg_vx(x, val);
-                                self.pc += 2;
-                            }
-                            None => (),
+                        if let Some(val) = bus.get_key_pressed() {
+                            self.write_reg_vx(x, val);
+                            self.pc += 2;
                         }
                     }
                     0x15 => {
                         bus.set_delay_timer(self.read_reg_vx(x));
                         self.pc += 2;
                     }
-                    0x65 => {
-                        for index in 0..x + 1 {
-                            let value = bus.ram_read_byte(self.i + index as u16);
-                            self.write_reg_vx(index, value);
-                        }
-                        self.pc += 2;
-                    }
                     0x18 => {
+                        // TODO Sound timer
                         self.pc += 2;
                     }
                     0x1E => {
@@ -259,6 +249,9 @@ impl Cpu {
                         self.pc += 2;
                     }
                     0x29 => {
+                        //i == sprite address for character in Vx
+                        //Multiply by 5 because each sprite has 5 lines, each line
+                        //is 1 byte.
                         self.i = self.read_reg_vx(x) as u16 * 5;
                         self.pc += 2;
                     }
@@ -297,7 +290,6 @@ impl Cpu {
     }
 
     fn debug_draw_sprite(&mut self, bus: &mut Bus, x: u8, y: u8, height: u8) {
-        // println!("Drawing sprite at ({}, {})", x, y);
         let mut should_set_vf = false;
         for sprite_y in 0..height {
             let b = bus.ram_read_byte(self.i + sprite_y as u16);
@@ -310,8 +302,6 @@ impl Cpu {
         } else {
             self.write_reg_vx(0xF, 0);
         }
-
-        // bus.present_screen();
     }
 
     pub fn write_reg_vx(&mut self, index: u8, value: u8) {
@@ -323,11 +313,11 @@ impl Cpu {
     }
 }
 
-impl fmt::Debug for Cpu {
+impl fmt::Debug for CPU {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(f, "\npc: {:#X}\n", self.pc)?;
         write!(f, "vx: ")?;
-        for item in self.vx.iter() {
+        for item in &self.vx {
             write!(f, "{:#X} ", *item)?;
         }
         write!(f, "\n")?;
