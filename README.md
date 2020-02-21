@@ -12,3 +12,6 @@ Games are included in `data` folder.
 
 ### Keyboard Map
 ![](images/keyboard-map.png)
+
+
+### Build
